@@ -1,4 +1,4 @@
-export default function FilterDigitsAndSeparators(input) {
+export default function FilterDigitsAndSeparators(input: string): string {
   if (typeof input != 'string') {
     return '';
   }

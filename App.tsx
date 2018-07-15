@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import { createStackNavigator } from 'react-navigation';
 import ContactListScreen from './src/screens/ContactListScreen';
 import ContactScreen from './src/screens/ContactScreen';

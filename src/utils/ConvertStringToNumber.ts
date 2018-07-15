@@ -1,4 +1,4 @@
-export default function ConvertStringToNumber(string) {
+export default function ConvertStringToNumber(string: string): number {
   if (typeof string != 'string') {
     return 0;
   }

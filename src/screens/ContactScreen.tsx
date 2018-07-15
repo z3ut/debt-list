@@ -1,19 +1,30 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Alert } from 'react-native';
-import { getContact, changeBalance, deleteContact } from '../services/ContactService';
+import contactService from '../services/ContactService';
 import FilterDigitsAndSeparators from '../utils/FilterOnlyDigits';
 import ConvertStringToNumber from '../utils/ConvertStringToNumber';
+import { NavigationScreenProp } from 'react-navigation';
 
-export default class ContactScreen extends React.Component {
-  static navigationOptions = ({ navigation }) => {
+export interface Props {
+  navigation: NavigationScreenProp<any, any>;
+}
+
+interface State {
+  name: string;
+  balance: string;
+  operationAmount: string;
+}
+
+export default class ContactScreen extends React.Component<Props, State> {
+  static navigationOptions = ({ navigation }: { navigation: any }) => {
     return {
       title: navigation.getParam('name', 'Contact'),
     };
   };
 
-  amountTextInput;
+  private amountTextInput: TextInput;
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       name: '',
@@ -31,10 +42,10 @@ export default class ContactScreen extends React.Component {
 
   updateContact() {
     const name = this.props.navigation.getParam('name', 'Contact');
-    getContact(name).then(contact => {
+    contactService.getContact(name).then(contact => {
       this.setState({
         name: contact.name,
-        balance: contact.balance
+        balance: contact.balance.toString()
       });
     }, err => Alert.alert('Error', `Error while loading contact ${name}`));
   }
@@ -61,11 +72,10 @@ export default class ContactScreen extends React.Component {
     this.changeContactBalance(amountAbs);
   }
 
-  changeContactBalance(amount) {
-    changeBalance(this.state.name, amount).then(contact => {
+  changeContactBalance(amount: number) {
+    contactService.changeBalance(this.state.name, amount).then(contact => {
       this.setState({
-        balance: contact.balance,
-        isModalVisible: false,
+        balance: contact.balance.toString(),
         operationAmount: '',
       });
     });
@@ -83,7 +93,7 @@ export default class ContactScreen extends React.Component {
   }
 
   deleteContact() {
-    deleteContact(this.state.name).then(() => {
+    contactService.deleteContact(this.state.name).then(() => {
       this.props.navigation.goBack();
     });
   }
@@ -98,7 +108,7 @@ export default class ContactScreen extends React.Component {
 
         <Text style={styles.inputTitle}>Operation amount:</Text>
         <TextInput
-          ref={(input) => { this.amountTextInput = input }}
+          ref={(input: TextInput) => { this.amountTextInput = input }}
           keyboardType = 'numeric'
           style={styles.input}
           onChangeText={(text) => this.setState({ operationAmount: FilterDigitsAndSeparators(text) })}

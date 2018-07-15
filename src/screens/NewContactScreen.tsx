@@ -1,17 +1,27 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, TouchableWithoutFeedback, View, Alert } from 'react-native';
-import { createContact } from '../services/ContactService';
+import contactService from '../services/ContactService';
 import FilterDigitsAndSeparators from '../utils/FilterOnlyDigits';
 import ConvertStringToNumber from '../utils/ConvertStringToNumber';
+import { NavigationScreenProp } from 'react-navigation';
 
-export default class ContactScreen extends React.Component {
-  static navigationOptions = ({ navigation }) => {
+export interface Props {
+  navigation: NavigationScreenProp<any, any>;
+}
+
+interface State {
+  name: string;
+  balance: string;
+}
+
+export default class ContactScreen extends React.Component<Props, State> {
+  static navigationOptions = ({ navigation }: { navigation: any }) => {
     return {
       title: navigation.getParam('name', 'New contact'),
     };
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       name: '',
@@ -21,7 +31,7 @@ export default class ContactScreen extends React.Component {
 
   createContact() {
     const balance = ConvertStringToNumber(this.state.balance);
-    createContact(this.state.name, balance).then(newContact => {
+    contactService.createContact(this.state.name, balance).then(newContact => {
       this.props.navigation.goBack();
     }, err => {
       Alert.alert('Creating error', err);

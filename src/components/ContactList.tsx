@@ -1,7 +1,13 @@
 import React from 'react';
 import { StyleSheet, Text, FlatList, View, TouchableWithoutFeedback } from 'react-native';
+import Contact from '../services/Contact';
 
-export default class ContactList extends React.Component {
+export interface Props {
+  contacts: Contact[];
+  onContactSelected: (contact: Contact) => void;
+}
+
+export default class ContactList extends React.Component<Props> {
   render() {
     return (
       <View style={styles.container}>

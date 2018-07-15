@@ -1,17 +1,27 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableWithoutFeedback } from 'react-native';
-import { getContacts } from '../services/ContactService';
+import contactService from '../services/ContactService';
 import ContactList from '../components/ContactList';
+import Contact from '../services/Contact';
+import { NavigationScreenProp } from 'react-navigation';
 
-export default class ContactListScreen extends React.Component {
+export interface Props {
+  navigation: NavigationScreenProp<any, any>;
+}
+
+interface State {
+  contacts: Contact[];
+}
+
+export default class ContactListScreen extends React.Component<Props, State> {
   static navigationOptions = {
     title: 'Contacts',
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      data: []
+      contacts: []
     };
   }
 
@@ -27,12 +37,12 @@ export default class ContactListScreen extends React.Component {
   }
 
   updateContacts() {
-    getContacts().then(contacts => {
-      this.setState({ data: contacts.slice() });
+    contactService.getContacts().then(contacts => {
+      this.setState({ contacts: contacts.slice() });
     });
   }
 
-  selectContact(contact) {
+  selectContact(contact: Contact) {
     this.props.navigation.navigate('Contact', { name: contact.name })
   }
 
@@ -44,7 +54,7 @@ export default class ContactListScreen extends React.Component {
     return (
       <View style={styles.container}>
         <ContactList
-          contacts={this.state.data}
+          contacts={this.state.contacts}
           onContactSelected={contact => this.selectContact(contact)} />
         <TouchableWithoutFeedback
             onPress={() => this.createNewContact() }>
