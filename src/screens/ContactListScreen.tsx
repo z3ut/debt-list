@@ -14,9 +14,9 @@ interface State {
 }
 
 export default class ContactListScreen extends React.Component<Props, State> {
-  static navigationOptions = {
-    title: 'Contacts',
-  };
+  static navigationOptions = ({ navigation }: { navigation: any }) => ({
+    title: navigation.getParam('title', 'Contacts'),
+  });
 
   constructor(props: Props) {
     super(props);
@@ -26,19 +26,19 @@ export default class ContactListScreen extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.updateContacts();
+    this.updateContactsStatus();
 
-    const didBlurSubscription = this.props.navigation.addListener(
-      'didFocus',
-      payload => {
-        this.updateContacts();
-      }
-    );
+    const didBlurSubscription = this.props.navigation
+      .addListener('didFocus', payload => this.updateContactsStatus());
   }
 
-  updateContacts() {
+  updateContactsStatus() {
     contactService.getContacts().then(contacts => {
       this.setState({ contacts: contacts.slice() });
+    });
+
+    contactService.getTotalBalance().then(balance => {
+      this.props.navigation.setParams({ title: `Balance: ${balance}`});
     });
   }
 

@@ -51,6 +51,11 @@ class ContactService {
     });
   }
 
+  getTotalBalance(): Promise<number> {
+    return this.getContacts().then(contacts =>
+      contacts.reduce((acc, cur) => acc + cur.balance, 0));
+  }
+
   private _saveContacts(contacts: Contact[]): Promise<void> {
     return AsyncStorage.setItem(this.contactsKey, JSON.stringify(contacts));
   }

@@ -16,11 +16,9 @@ interface State {
 }
 
 export default class ContactScreen extends React.Component<Props, State> {
-  static navigationOptions = ({ navigation }: { navigation: any }) => {
-    return {
-      title: navigation.getParam('name', 'Contact'),
-    };
-  };
+  static navigationOptions = ({ navigation }: { navigation: any }) => ({
+    title: navigation.getParam('name', 'Contact'),
+  });
 
   private amountTextInput: TextInput;
 
