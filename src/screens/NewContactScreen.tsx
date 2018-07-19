@@ -4,6 +4,7 @@ import contactService from '../services/ContactService';
 import FilterDigitsAndSeparators from '../utils/FilterOnlyDigits';
 import ConvertStringToNumber from '../utils/ConvertStringToNumber';
 import { NavigationScreenProp } from 'react-navigation';
+import { KeyboardAvoidingView } from 'react-native';
 
 export interface Props {
   navigation: NavigationScreenProp<any, any>;
@@ -14,7 +15,7 @@ interface State {
   balance: string;
 }
 
-export default class ContactScreen extends React.Component<Props, State> {
+export default class NewContactScreen extends React.Component<Props, State> {
   static navigationOptions = ({ navigation }: { navigation: any }) => {
     return {
       title: navigation.getParam('name', 'New contact'),
@@ -31,16 +32,14 @@ export default class ContactScreen extends React.Component<Props, State> {
 
   createContact() {
     const balance = ConvertStringToNumber(this.state.balance);
-    contactService.createContact(this.state.name, balance).then(newContact => {
-      this.props.navigation.goBack();
-    }, err => {
-      Alert.alert('Creating error', err);
-    });
+    contactService.createContact(this.state.name, balance)
+      .then(() => this.props.navigation.goBack(),
+        err => Alert.alert('Creating error', err));
   }
 
   render() {
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior='padding' enabled>
         <Text style={styles.inputTitle}>Name:</Text>
         <TextInput
           style={styles.input}
@@ -68,8 +67,7 @@ export default class ContactScreen extends React.Component<Props, State> {
           </View>
         </TouchableWithoutFeedback>
         </View>
-
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }

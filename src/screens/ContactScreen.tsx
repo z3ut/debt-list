@@ -1,8 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Alert } from 'react-native';
 import contactService from '../services/ContactService';
-import FilterDigitsAndSeparators from '../utils/FilterOnlyDigits';
-import ConvertStringToNumber from '../utils/ConvertStringToNumber';
 import { NavigationScreenProp } from 'react-navigation';
 
 export interface Props {
@@ -12,7 +10,6 @@ export interface Props {
 interface State {
   name: string;
   balance: string;
-  operationAmount: string;
 }
 
 export default class ContactScreen extends React.Component<Props, State> {
@@ -20,14 +17,11 @@ export default class ContactScreen extends React.Component<Props, State> {
     title: navigation.getParam('name', 'Contact'),
   });
 
-  private amountTextInput: TextInput;
-
   constructor(props: Props) {
     super(props);
     this.state = {
       name: '',
       balance: '',
-      operationAmount: '',
     };
   }
 
@@ -43,44 +37,13 @@ export default class ContactScreen extends React.Component<Props, State> {
     contactService.getContact(name).then(contact => {
       this.setState({
         name: contact.name,
-        balance: contact.balance.toString()
-      });
-    }, err => Alert.alert('Error', `Error while loading contact ${name}`));
-  }
-
-  borrow() {
-    const amountAbs = ConvertStringToNumber(this.state.operationAmount);
-
-    if (!amountAbs) {
-      this.focusAmountInput();
-      return;
-    }
-
-    this.changeContactBalance(-amountAbs);
-  }
-
-  lend() {
-    const amountAbs = ConvertStringToNumber(this.state.operationAmount);
-
-    if (!amountAbs) {
-      this.focusAmountInput();
-      return;
-    }
-
-    this.changeContactBalance(amountAbs);
-  }
-
-  changeContactBalance(amount: number) {
-    contactService.changeBalance(this.state.name, amount).then(contact => {
-      this.setState({
         balance: contact.balance.toString(),
-        operationAmount: '',
       });
-    });
+    }, () => Alert.alert('Error', `Error while loading contact ${name}`));
   }
 
-  focusAmountInput() {
-    this.amountTextInput.focus();
+  updateContactBalance() {
+    this.props.navigation.navigate('ContactOperation', { name: this.state.name });
   }
 
   openDeleteModal() {
@@ -90,7 +53,7 @@ export default class ContactScreen extends React.Component<Props, State> {
     ], { cancelable: true });
   }
 
-  deleteContact() {
+  private deleteContact() {
     contactService.deleteContact(this.state.name).then(() => {
       this.props.navigation.goBack();
     });
@@ -104,34 +67,13 @@ export default class ContactScreen extends React.Component<Props, State> {
 
         <View style={styles.emptySpace}></View>
 
-        <Text style={styles.inputTitle}>Operation amount:</Text>
-        <TextInput
-          ref={(input: TextInput) => { this.amountTextInput = input }}
-          keyboardType = 'numeric'
-          style={styles.input}
-          onChangeText={(text) => this.setState({ operationAmount: FilterDigitsAndSeparators(text) })}
-          value={this.state.operationAmount}
-        />
-
-        <View style={styles.emptySpace}></View>
-
-        <View style={styles.buttonContainer}>
-          <View style={{ flex: 1, marginRight: 5, }}>
-            <TouchableWithoutFeedback
-                onPress={() => this.borrow() }>
-              <View>
-                <Text style={styles.button}>- Borrow</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-          <View style={{ flex: 1, marginLeft: 5, }}>
-            <TouchableWithoutFeedback
-                onPress={() => this.lend() }>
-              <View>
-                <Text style={styles.button}>Lend +</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
+        <View style={{ width: '100%' }}>
+          <TouchableWithoutFeedback
+              onPress={() => this.updateContactBalance() }>
+            <View>
+              <Text style={[styles.button, styles.updateButton]}>Update</Text>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
 
         <View style={styles.emptySpace}></View>
@@ -157,13 +99,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
   button: {
     padding: 10,
     fontSize: 20,
@@ -174,19 +109,13 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#FF0000',
   },
+  updateButton: {
+
+  },
   statusText: {
     fontSize: 24,
   },
   emptySpace: {
     height: 40,
-  },
-  inputTitle: {
-    fontSize: 18,
-  },
-  input: {
-    height: 40,
-    fontSize: 24,
-    width: '100%',
-    textAlign: 'center',
   },
 });
