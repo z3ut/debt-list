@@ -1,13 +1,16 @@
 import { AsyncStorage } from 'react-native';
 import Contact from './Contact';
+import BalanceChange from './BalanceChange';
 
 class ContactService {
   private contactsKey = 'contacts';
+  private initialAmountComment = 'Initial amount';
 
   getContacts(): Promise<Contact[]> {
     return AsyncStorage.getItem(this.contactsKey)
       .then(result => result || '[]')
-      .then(contactsJSON => JSON.parse(contactsJSON));
+      .then(contactsJSON => JSON.parse(contactsJSON) as Contact[])
+      .then(contacts => this.mapContacts(contacts));
   }
 
   getContact(name: string): Promise<Contact> {
@@ -29,19 +32,38 @@ class ContactService {
         throw(`Contact with name '${name}' already exists`);
       }
 
-      const newContact = { name, balance };
+      const balanceChanges = balance !== 0 ?
+        [this.createBalanceChange(0, balance, this.initialAmountComment)] :
+        [];
+
+      const newContact: Contact = {
+        name,
+        balance,
+        balanceChanges,
+      };
+
       contacts.push(newContact);
-      this._saveContacts(contacts);
-      return newContact;
+
+      return this._saveContacts(contacts)
+        .then(() => newContact);
     });
   }
 
-  saveContact(name: string, balance: number): Promise<Contact> {
-    return this._updateContact(name, c => c.balance = balance);
-  }
+  changeBalance(name: string, amount: number, comment: string = ''): Promise<Contact> {
+    return this.getContacts().then(contacts => {
+      const contact = this._findContact(contacts, name);
 
-  changeBalance(name: string, amount: number): Promise<Contact> {
-    return this._updateContact(name, c => c.balance += amount);
+      if (!contact) {
+        throw(`Contact ${name} not found`);
+      }
+
+      contact.balanceChanges.push(
+        this.createBalanceChange(contact.balance, amount, comment));
+      contact.balance += amount;
+
+      return this._saveContacts(contacts)
+        .then(() => contact);
+    });
   }
 
   deleteContact(name: string): Promise<void> {
@@ -56,6 +78,19 @@ class ContactService {
       contacts.reduce((acc, cur) => acc + cur.balance, 0));
   }
 
+  private mapContacts(contacts: Contact[]): Contact[] {
+    return contacts.map(contact => {
+      if (Array.isArray(contact.balanceChanges)) {
+        contact.balanceChanges.forEach(balanceChange => {
+          balanceChange.date = new Date(balanceChange.date);
+        });
+      } else {
+        contact.balanceChanges = [];
+      }
+      return contact;
+    });
+  }
+
   private _saveContacts(contacts: Contact[]): Promise<void> {
     return AsyncStorage.setItem(this.contactsKey, JSON.stringify(contacts));
   }
@@ -64,23 +99,15 @@ class ContactService {
     return contacts.find(c => c.name === name) || null;
   }
 
-  private _updateContact(name: string, operation: (c: Contact) => void): Promise<Contact> {
-    if (typeof operation != 'function') {
-      throw('Operation function was not provided');
-    }
-
-    return this.getContacts().then(contacts => {
-      const contact = this._findContact(contacts, name);
-
-      if (!contact) {
-        throw(`Contact ${name} not found`);
-      }
-
-      operation(contact);
-
-      this._saveContacts(contacts);
-      return contact;
-    });
+  private createBalanceChange(balance: number, amount: number,
+      comment: string = ''): BalanceChange {
+    return {
+      amount,
+      date: new Date(),
+      comment,
+      balanceBefore: balance,
+      balanceAfter: balance + amount,
+    };
   }
 }
 
