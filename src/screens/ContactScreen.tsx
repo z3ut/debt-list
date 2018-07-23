@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert } from 'react-native';
 import contactService from '../services/ContactService';
 import { NavigationScreenProp } from 'react-navigation';
 
@@ -46,6 +46,10 @@ export default class ContactScreen extends React.Component<Props, State> {
     this.props.navigation.navigate('ContactOperation', { name: this.state.name });
   }
 
+  navigateToBalanceHistory() {
+    this.props.navigation.navigate('ContactHistory', { name: this.state.name });
+  }
+
   openDeleteModal() {
     Alert.alert('Delete', `Are you sure you want to delete ${this.state.name}?`, [
       { text: 'Cancel', onPress: () => {}, style: 'cancel' },
@@ -72,6 +76,17 @@ export default class ContactScreen extends React.Component<Props, State> {
               onPress={() => this.updateContactBalance() }>
             <View>
               <Text style={[styles.button, styles.updateButton]}>Update</Text>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+
+        <View style={styles.emptySpace}></View>
+
+        <View style={{ width: '100%' }}>
+          <TouchableWithoutFeedback
+              onPress={() => this.navigateToBalanceHistory() }>
+            <View>
+              <Text style={styles.button}>History</Text>
             </View>
           </TouchableWithoutFeedback>
         </View>

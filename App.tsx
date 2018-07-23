@@ -4,13 +4,15 @@ import ContactListScreen from './src/screens/ContactListScreen';
 import ContactScreen from './src/screens/ContactScreen';
 import NewContactScreen from './src/screens/NewContactScreen';
 import ContactOperationScreen from './src/screens/ContactOperationScreen';
+import ContactHistoryScreen from './src/screens/ContactHistoryScreen';
 
 const RootStack = createStackNavigator(
   {
     ContactList: ContactListScreen,
     Contact: ContactScreen,
     NewContact: NewContactScreen,
-    ContactOperation: ContactOperationScreen
+    ContactOperation: ContactOperationScreen,
+    ContactHistory: ContactHistoryScreen,
   }, {
     initialRouteName: 'ContactList',
     navigationOptions: {
