@@ -2,7 +2,9 @@
 
 <p align="center">
   <img alt="Contacts list" src="img/contacts.png" width="180">
-  <img alt="Contact operations" src="img/contact_operations.png" width="180">
+  <img alt="Contact actions" src="img/contact_actions.png" width="180">
+  <img alt="Contact operation" src="img/contact_operation.png" width="180">
+  <img alt="Contact history" src="img/contact_history.png" width="180">
   <img alt="New contact" src="img/new_contact.png" width="180">
 </p>
 
